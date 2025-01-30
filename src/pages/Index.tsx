@@ -3,6 +3,19 @@ import FuelEntryForm from '@/components/FuelEntryForm';
 import FuelEntryList from '@/components/FuelEntryList';
 import ConsumptionChart from '@/components/ConsumptionChart';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { toast } from "@/hooks/use-toast";
 
 interface FuelEntry {
   date: string;
@@ -55,6 +68,21 @@ const Index = () => {
     setFormData(newData);
   };
 
+  const handleDeleteAllData = () => {
+    setEntries([]);
+    setFormData({
+      date: '',
+      totalPrice: '',
+      liters: '',
+      mileage: '',
+    });
+    localStorage.removeItem('fuelEntries');
+    toast({
+      title: "Données supprimées",
+      description: "Toutes les données ont été effacées avec succès.",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -63,10 +91,11 @@ const Index = () => {
         </h1>
 
         <Tabs defaultValue="form" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="form">Nouveau</TabsTrigger>
             <TabsTrigger value="list">Historique</TabsTrigger>
             <TabsTrigger value="chart">Graphique</TabsTrigger>
+            <TabsTrigger value="settings">Paramètres</TabsTrigger>
           </TabsList>
           
           <TabsContent value="form" className="mt-4">
@@ -83,6 +112,36 @@ const Index = () => {
           
           <TabsContent value="chart" className="mt-4">
             <ConsumptionChart entries={entries} />
+          </TabsContent>
+
+          <TabsContent value="settings" className="mt-4">
+            <div className="space-y-6 p-4 bg-white rounded-lg shadow">
+              <div>
+                <h3 className="text-lg font-medium mb-4">Gestion des données</h3>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive">
+                      Supprimer toutes les données
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Cette action supprimera définitivement toutes vos données enregistrées.
+                        Cette action est irréversible.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Annuler</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDeleteAllData}>
+                        Supprimer
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
