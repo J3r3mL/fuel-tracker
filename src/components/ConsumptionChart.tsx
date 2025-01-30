@@ -15,36 +15,51 @@ interface ConsumptionChartProps {
 
 const ConsumptionChart: React.FC<ConsumptionChartProps> = ({ entries }) => {
   const chartData = entries
-    .map((entry, index) => {
-      const prevEntry = entries[index + 1];
-      if (!prevEntry) return null;
+    .slice()
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .map((entry, index, sortedEntries) => {
+      const nextEntry = sortedEntries[index + 1];
+      if (!nextEntry) return null;
 
-      const distance = entry.mileage - prevEntry.mileage;
-      const consumption = (entry.liters / distance) * 100;
+      const distance = nextEntry.mileage - entry.mileage;
+      const consumption = (nextEntry.liters / distance) * 100;
 
       return {
-        date: entry.date,
+        date: nextEntry.date,
         consumption: Number(consumption.toFixed(2)),
       };
     })
-    .filter((entry): entry is { date: string; consumption: number } => entry !== null)
-    .reverse();
+    .filter((entry): entry is { date: string; consumption: number } => entry !== null);
 
   return (
     <Card className="p-4 w-full">
-      <h3 className="text-lg font-semibold mb-4">Évolution de la consommation</h3>
+      <h3 className="text-lg font-semibold mb-4">Évolution de la consommation (L/100km)</h3>
       <div className="h-[300px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData}>
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip />
+            <XAxis 
+              dataKey="date" 
+              angle={-45}
+              textAnchor="end"
+              height={60}
+              interval={0}
+              tick={{ fontSize: 12 }}
+            />
+            <YAxis 
+              domain={['auto', 'auto']}
+              tick={{ fontSize: 12 }}
+            />
+            <Tooltip 
+              formatter={(value: number) => [`${value} L/100km`, 'Consommation']}
+              labelFormatter={(label: string) => `Date: ${label}`}
+            />
             <Line
               type="monotone"
               dataKey="consumption"
               stroke="#2563eb"
               strokeWidth={2}
-              dot={{ fill: '#2563eb' }}
+              dot={{ fill: '#2563eb', r: 4 }}
+              activeDot={{ r: 6 }}
             />
           </LineChart>
         </ResponsiveContainer>
