@@ -8,6 +8,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Pencil } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import FuelEntryForm from './FuelEntryForm';
 
 interface FuelEntry {
   date: string;
@@ -24,9 +33,12 @@ interface FuelEntryWithStats extends FuelEntry {
 
 interface FuelEntryListProps {
   entries: FuelEntry[];
+  onUpdateEntry: (index: number, updatedEntry: FuelEntry) => void;
 }
 
-const FuelEntryList: React.FC<FuelEntryListProps> = ({ entries }) => {
+const FuelEntryList: React.FC<FuelEntryListProps> = ({ entries, onUpdateEntry }) => {
+  const [editingIndex, setEditingIndex] = React.useState<number | null>(null);
+
   const processedEntries: FuelEntryWithStats[] = entries
     .map((entry, index) => {
       const prevEntry = entries[index + 1];
@@ -49,41 +61,78 @@ const FuelEntryList: React.FC<FuelEntryListProps> = ({ entries }) => {
     })
     .reverse();
 
+  const handleEdit = (index: number) => {
+    setEditingIndex(index);
+  };
+
+  const handleUpdate = (entry: FuelEntry) => {
+    if (editingIndex !== null) {
+      onUpdateEntry(entries.length - 1 - editingIndex, entry);
+      setEditingIndex(null);
+    }
+  };
+
   return (
-    <Card className="w-full overflow-x-auto">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Date</TableHead>
-            <TableHead>Prix</TableHead>
-            <TableHead>Litres</TableHead>
-            <TableHead>€/L</TableHead>
-            <TableHead>Km</TableHead>
-            <TableHead>Distance</TableHead>
-            <TableHead>L/100km</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {processedEntries.map((entry, index) => (
-            <TableRow key={index}>
-              <TableCell>{entry.date}</TableCell>
-              <TableCell>{entry.totalPrice.toFixed(2)}€</TableCell>
-              <TableCell>{entry.liters.toFixed(2)}L</TableCell>
-              <TableCell>{entry.pricePerLiter?.toFixed(2)}€</TableCell>
-              <TableCell>{entry.mileage}km</TableCell>
-              <TableCell>
-                {entry.distanceSinceLast ? `${entry.distanceSinceLast}km` : '-'}
-              </TableCell>
-              <TableCell>
-                {entry.consumptionPer100km
-                  ? `${entry.consumptionPer100km.toFixed(2)}L`
-                  : '-'}
-              </TableCell>
+    <>
+      <Card className="w-full overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Date</TableHead>
+              <TableHead>Prix</TableHead>
+              <TableHead>Litres</TableHead>
+              <TableHead>€/L</TableHead>
+              <TableHead>Km</TableHead>
+              <TableHead>Distance</TableHead>
+              <TableHead>L/100km</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </Card>
+          </TableHeader>
+          <TableBody>
+            {processedEntries.map((entry, index) => (
+              <TableRow key={index}>
+                <TableCell>{entry.date}</TableCell>
+                <TableCell>{entry.totalPrice.toFixed(2)}€</TableCell>
+                <TableCell>{entry.liters.toFixed(2)}L</TableCell>
+                <TableCell>{entry.pricePerLiter?.toFixed(2)}€</TableCell>
+                <TableCell>{entry.mileage}km</TableCell>
+                <TableCell>
+                  {entry.distanceSinceLast ? `${entry.distanceSinceLast}km` : '-'}
+                </TableCell>
+                <TableCell>
+                  {entry.consumptionPer100km
+                    ? `${entry.consumptionPer100km.toFixed(2)}L`
+                    : '-'}
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleEdit(index)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Card>
+
+      <Dialog open={editingIndex !== null} onOpenChange={() => setEditingIndex(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Modifier l'entrée</DialogTitle>
+          </DialogHeader>
+          {editingIndex !== null && (
+            <FuelEntryForm
+              onSubmit={handleUpdate}
+              initialValues={processedEntries[editingIndex]}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

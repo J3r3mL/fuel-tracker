@@ -14,14 +14,15 @@ interface FuelEntry {
 
 interface FuelEntryFormProps {
   onSubmit: (entry: FuelEntry) => void;
+  initialValues?: FuelEntry;
 }
 
-const FuelEntryForm: React.FC<FuelEntryFormProps> = ({ onSubmit }) => {
+const FuelEntryForm: React.FC<FuelEntryFormProps> = ({ onSubmit, initialValues }) => {
   const { toast } = useToast();
-  const [date, setDate] = React.useState(format(new Date(), 'yyyy-MM-dd'));
-  const [totalPrice, setTotalPrice] = React.useState('');
-  const [liters, setLiters] = React.useState('');
-  const [mileage, setMileage] = React.useState('');
+  const [date, setDate] = React.useState(initialValues?.date || format(new Date(), 'yyyy-MM-dd'));
+  const [totalPrice, setTotalPrice] = React.useState(initialValues?.totalPrice.toString() || '');
+  const [liters, setLiters] = React.useState(initialValues?.liters.toString() || '');
+  const [mileage, setMileage] = React.useState(initialValues?.mileage.toString() || '');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,18 +44,26 @@ const FuelEntryForm: React.FC<FuelEntryFormProps> = ({ onSubmit }) => {
     };
 
     onSubmit(entry);
-    setTotalPrice('');
-    setLiters('');
-    setMileage('');
     
-    toast({
-      title: "Succès",
-      description: "Plein d'essence enregistré",
-    });
+    if (!initialValues) {
+      setTotalPrice('');
+      setLiters('');
+      setMileage('');
+      
+      toast({
+        title: "Succès",
+        description: "Plein d'essence enregistré",
+      });
+    } else {
+      toast({
+        title: "Succès",
+        description: "Plein d'essence modifié",
+      });
+    }
   };
 
   return (
-    <Card className="p-4 w-full max-w-md mx-auto">
+    <Card className={`p-4 w-full ${!initialValues ? 'max-w-md mx-auto' : ''}`}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium mb-1">Date</label>
@@ -94,7 +103,7 @@ const FuelEntryForm: React.FC<FuelEntryFormProps> = ({ onSubmit }) => {
           />
         </div>
         <Button type="submit" className="w-full">
-          Ajouter
+          {initialValues ? 'Modifier' : 'Ajouter'}
         </Button>
       </form>
     </Card>

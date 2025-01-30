@@ -25,6 +25,12 @@ const Index = () => {
     setEntries([entry, ...entries]);
   };
 
+  const handleUpdateEntry = (index: number, updatedEntry: FuelEntry) => {
+    const newEntries = [...entries];
+    newEntries[index] = updatedEntry;
+    setEntries(newEntries);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -44,7 +50,7 @@ const Index = () => {
           </TabsContent>
           
           <TabsContent value="list" className="mt-4">
-            <FuelEntryList entries={entries} />
+            <FuelEntryList entries={entries} onUpdateEntry={handleUpdateEntry} />
           </TabsContent>
           
           <TabsContent value="chart" className="mt-4">
