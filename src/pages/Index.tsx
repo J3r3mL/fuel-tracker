@@ -11,10 +11,24 @@ interface FuelEntry {
   mileage: number;
 }
 
+interface FormData {
+  date: string;
+  totalPrice: string;
+  liters: string;
+  mileage: string;
+}
+
 const Index = () => {
   const [entries, setEntries] = React.useState<FuelEntry[]>(() => {
     const saved = localStorage.getItem('fuelEntries');
     return saved ? JSON.parse(saved) : [];
+  });
+
+  const [formData, setFormData] = React.useState<FormData>({
+    date: '',
+    totalPrice: '',
+    liters: '',
+    mileage: '',
   });
 
   React.useEffect(() => {
@@ -23,12 +37,22 @@ const Index = () => {
 
   const handleNewEntry = (entry: FuelEntry) => {
     setEntries([entry, ...entries]);
+    setFormData({
+      date: '',
+      totalPrice: '',
+      liters: '',
+      mileage: '',
+    });
   };
 
   const handleUpdateEntry = (index: number, updatedEntry: FuelEntry) => {
     const newEntries = [...entries];
     newEntries[index] = updatedEntry;
     setEntries(newEntries);
+  };
+
+  const handleFormChange = (newData: FormData) => {
+    setFormData(newData);
   };
 
   return (
@@ -46,7 +70,11 @@ const Index = () => {
           </TabsList>
           
           <TabsContent value="form" className="mt-4">
-            <FuelEntryForm onSubmit={handleNewEntry} />
+            <FuelEntryForm 
+              onSubmit={handleNewEntry} 
+              formData={formData}
+              onFormChange={handleFormChange}
+            />
           </TabsContent>
           
           <TabsContent value="list" className="mt-4">
