@@ -4,6 +4,7 @@ import FuelEntryList from '@/components/FuelEntryList';
 import ConsumptionChart from '@/components/ConsumptionChart';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -83,6 +84,53 @@ const Index = () => {
     });
   };
 
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result;
+      if (typeof text !== 'string') return;
+
+      const lines = text.split('\n');
+      const newEntries: FuelEntry[] = [];
+      
+      // Skip header line
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+
+        const [date, totalPrice, liters, mileage] = line.split(',').map(val => val.trim());
+        
+        if (date && totalPrice && liters && mileage) {
+          newEntries.push({
+            date,
+            totalPrice: parseFloat(totalPrice),
+            liters: parseFloat(liters),
+            mileage: parseFloat(mileage),
+          });
+        }
+      }
+
+      if (newEntries.length > 0) {
+        setEntries(prevEntries => [...newEntries, ...prevEntries]);
+        toast({
+          title: "Import réussi",
+          description: `${newEntries.length} entrées ont été importées.`,
+        });
+      } else {
+        toast({
+          title: "Erreur",
+          description: "Aucune entrée valide n'a été trouvée dans le fichier.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    reader.readAsText(file);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -116,6 +164,19 @@ const Index = () => {
 
           <TabsContent value="settings" className="mt-4">
             <div className="space-y-6 p-4 bg-white rounded-lg shadow">
+              <div>
+                <h3 className="text-lg font-medium mb-4">Import de données</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Format attendu : Date, Prix, Litres, Kilométrage
+                </p>
+                <Input
+                  type="file"
+                  accept=".csv"
+                  onChange={handleFileUpload}
+                  className="mb-6"
+                />
+              </div>
+              
               <div>
                 <h3 className="text-lg font-medium mb-4">Gestion des données</h3>
                 <AlertDialog>

@@ -37,13 +37,13 @@ const FuelEntryForm: React.FC<FuelEntryFormProps> = ({
     initialValues?.date || formData?.date || format(new Date(), 'yyyy-MM-dd')
   );
   const [localTotalPrice, setLocalTotalPrice] = React.useState(
-    initialValues?.totalPrice.toString() || formData?.totalPrice || ''
+    initialValues?.totalPrice?.toString() || formData?.totalPrice || ''
   );
   const [localLiters, setLocalLiters] = React.useState(
-    initialValues?.liters.toString() || formData?.liters || ''
+    initialValues?.liters?.toString() || formData?.liters || ''
   );
   const [localMileage, setLocalMileage] = React.useState(
-    initialValues?.mileage.toString() || formData?.mileage || ''
+    initialValues?.mileage?.toString() || formData?.mileage || ''
   );
 
   const updateFormData = (
@@ -132,7 +132,7 @@ const FuelEntryForm: React.FC<FuelEntryFormProps> = ({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Prix total (€)</label>
+          <label className="block text-sm font-medium mb-1">Prix total (₪)</label>
           <Input
             type="number"
             step="0.01"
